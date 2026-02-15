@@ -1,0 +1,99 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Canadian AI Latex Template    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{cai26}
+
+\begin{document}
+% Editorial staff will replace the following values:
+% 1. Conference Year
+% 2. Issue number
+% 3. Article DOI
+\def\conferenceyear{2026}
+\volumeheader{39}{0}%{00.000}
+\begin{center}
+
+\title{Temporal Characterization and Deep Learning--Based Modeling of Human Sleep from Multivariate Polysomnography-Derived Features}
+\maketitle
+
+\thispagestyle{empty}
+\pagenumbering{gobble}
+
+\begin{tabular}{cccc}
+Thiwanka Abeyweera\upstairs{\affilone,*} &
+Neha Malhan\upstairs{\affilone} &
+Ajay Dhruv\upstairs{\affilone} &
+Cynthia Urrutia\upstairs{\affilone}
+\\[0.25ex]
+\multicolumn{4}{c}{{\small \upstairs{\affilone} Faculty of Science, Thompson Rivers University, Kamloops, Canada}}
+\end{tabular}
+
+% Replace with corresponding author email address
+\emails{
+  \upstairs{*} abeyweerat24@mytru.ca, malhann24@mytru.ca, adhruv@tru.ca, urrutiachaconc23@mytru.ca
+}
+\vspace*{0.1in}
+\end{center}
+
+\begin{abstract}
+Artificial intelligence is increasingly used to analyze physiological signals for health assessment, yet many methods still fail to account for the temporal structure embedded in these data. In sleep research, for example, 30-second epochs are often treated as independent samples, which limits the ability to study sleep-stage transitions, signal interactions, and broader patterns in an individual's sleep architecture. To overcome these limitations, this work introduces a modular temporal analysis for modeling sleep physiology using features extracted from polysomnography (PSG). The approach combines subject-level sleep pattern profiling, multivariate temporal-dependency modeling, and sequence-based sleep-stage prediction to capture both short- and long-range temporal dynamics in EEG, EOG, and EMG signals. Linear vector autoregression is applied to quantify cross-signal relationships and temporal persistence, while a Bi-LSTM sequence model leverages contextual information for sleep-stage classification. Experiments using the Sleep-EDF dataset reveal substantial differences across individuals in sleep fragmentation, strong within-signal temporal continuity, and selective cross-modal coupling. Incorporating temporal structure improves classification accuracy from 74.92\% to 83.94\% and raises the macro F1-score from 0.57 to 0.65, reflecting better detection of minority and transitional stages. Overall, the findings show that temporal modeling enhances interpretability and predictive performance, supporting its value as a foundation for developing sleep-based biomarkers relevant to cognitive and mental-health assessment.
+\end{abstract}
+
+\begin{keywords}{Keywords:}
+Sleep analysis, Polysomnography, Temporal modeling, Sleep-stage transitions, Vector autoregression, Recurrent neural networks, EEG, EOG, EMG
+\end{keywords}
+\copyrightnotice
+
+\section{Introduction}
+
+Cognitive and mental-health disorders, including Alzheimer's Disease (AD), mild cognitive impairment (MCI), and depression, remain major global clinical challenges. Conventional diagnostic methods depend heavily on subjective self-reports and costly neuroimaging techniques, which often lack the temporal resolution needed for continuous monitoring. Recent progress in multimodal artificial intelligence, however, has enabled the extraction of objective biomarkers from physiological signals, offering scalable, data-driven alternatives for assessing health.
+
+Among these biomarkers, human sleep architecture plays a central role in reflecting neurological and psychological health. Alterations in sleep continuity, stage distribution, and transition dynamics are frequently associated with both cognitive decline and mental-health disorders. Polysomnography (PSG), which captures synchronized neural, ocular, and muscular activity during sleep, provides a unique opportunity to analyze these processes at high temporal resolution. However, modeling the dynamic and sequential nature of sleep physiology remains a significant challenge.
+
+Multimodal learning systems consistently outperform unimodal approaches by integrating heterogeneous yet complementary sources of information. While structural MRI remains a key modality for studying neurodegenerative disease, physiological signals recorded during sleep provide a functional view of real-time brain and body dynamics. Despite growing interest in sleep-based modeling, many existing approaches treat sleep stages as independent classification targets, overlooking temporal dependencies between consecutive epochs and offering limited insight into sleep-stage transitions.
+
+To address these limitations, this study proposes a generalizable multimodal AI framework for temporal sleep analysis using PSG-derived physiological signals. Rather than focusing solely on per-epoch classification accuracy, the methodology explicitly models sleep as a time-dependent and multivariate process. The proposed approach is guided by three primary objectives:
+\begin{enumerate}
+\item Subject-Level Sleep Pattern Analysis: To summarize and compare sleep architecture across individuals using aggregated temporal representations.
+\item Predictive Sequence Modeling: To predict sleep stages at the epoch level by incorporating temporal dependencies in physiological signals.
+\item Temporal Dependency and Transition Analysis: To examine how physiological activity evolves over time and to characterize typical sleep-stage transition patterns using temporal modeling techniques.
+\end{enumerate}
+
+By integrating linear and nonlinear temporal modeling techniques within a unified framework, this work aims to advance the analysis of sleep physiology beyond independent epoch-level predictions. The proposed approach emphasizes reproducibility and scalability, providing a principled foundation for biomarker-based cognitive and mental-health assessment through the lens of human sleep dynamics.
+
+The proposed methodology analyzes sleep physiology at three complementary temporal resolutions. First, subject-level aggregation is used to characterize population-level sleep patterns and to identify representative individual recordings. Second, within-subject temporal dependency modeling is performed to examine short-term physiological interactions during sleep. Finally, sequence-based models are applied at the epoch level to evaluate the impact of temporal context on sleep-stage prediction. This hierarchical design enables population, individual, and epoch-level analysis within a unified temporal framework.
+
+\section{Literature Review}
+
+\subsection{Sleep as a Temporal Biomarker for Cognitive and Mental Health}
+
+Sleep architecture is increasingly recognized as a critical physiological biomarker for cognitive and mental health. Alterations in sleep continuity, abnormal stage distributions, and irregular transitions have been associated with depression, stress-related disorders, mild cognitive impairment (MCI), and Alzheimer's Disease (AD) [4], [5], [10]. Unlike subjective questionnaires or episodic neuroimaging, polysomnography (PSG) provides continuous, high-resolution recordings of neural, ocular, and muscular activity across the night, enabling detailed analysis of physiological dynamics.
+
+Recent multimodal mental-health studies demonstrate that incorporating physiological signals---such as ECG and sleep-related features---substantially improves early detection and monitoring of psychological stress and mental-health conditions [4], [10]. However, many AI-driven health assessment systems reduce sleep data to aggregate metrics or treat sleep stages as independent observations. This simplification neglects the inherently sequential structure of sleep, where physiological states evolve continuously and are governed by well-defined transition dynamics.
+
+\subsection{Temporal Modeling of Physiological Signals}
+
+Temporal dependency modeling has been widely explored in cognitive and mental-health research outside the sleep domain. Longitudinal autoregressive (AR) models have been applied to multimodal biomarkers, including MRI-derived features and neuropsychological scores, to track disease progression in MCI and AD, demonstrating advantages over static modeling approaches [5]. Similarly, CNN-based classifiers trained on the OASIS MRI dataset achieve strong performance in Alzheimer's stage classification but do not explicitly incorporate temporal dependencies across observations [8].
+
+Sequential learning approaches, such as Long Short-Term Memory (LSTM) networks and attention-based models, have shown effectiveness in modeling time-dependent physiological and behavioral signals. For example, LSTM-based frameworks capture temporal dependencies in multimodal learning analytics for real-time psychological state prediction [3]. In speech-based cognitive screening, temporal acoustic features---such as pause duration and temporal positioning---have been shown to carry significant diagnostic information when modeled sequentially rather than as global summaries [12].
+
+These findings suggest that physiological signals contain meaningful information in their temporal ordering, motivating sequence-aware modeling approaches for sleep-stage prediction.
+
+\subsection{Limitations of Existing Sleep-Stage Modeling Approaches}
+
+Despite advances in temporal modeling in adjacent domains, many sleep-stage classification systems rely on epoch-wise CNN predictions that assume independence between consecutive epochs. While such models achieve high per-epoch accuracy, they do not explicitly model how preceding physiological states influence future sleep stages. As a result, important temporal phenomena---such as stage persistence, recurrence, and transition regularity---are not explicitly represented.
+
+Moreover, sleep disorders and cognitive impairments are often characterized by abnormal transition patterns rather than isolated stage abnormalities. However, most existing systems emphasize descriptive sleep statistics (e.g., total REM duration or sleep efficiency) without explicitly modeling transition dynamics between stages.
+
+\subsection{Multimodal Fusion and Temporal Dependency Analysis}
+
+Multimodal fusion architectures have been proposed to integrate heterogeneous physiological signals for mental-health and emotion recognition. Attention-based fusion and cross-modal graph fusion techniques have demonstrated the ability to model complex inter-modal relationships across audio, visual, and textual modalities [16]. Multitask adversarial frameworks integrating EEG and eye-movement signals further highlight the importance of preserving modality-specific temporal structure while improving robustness [17].
+
+In speech-based disease classification, correlation structures of time-shifted acoustic features have been used to distinguish between neurological and affective disorders, illustrating that temporal relationships themselves can serve as discriminative biomarkers [7]. These approaches collectively emphasize the importance of modeling physiological systems as interacting, time-dependent processes rather than isolated signals.
+
+\subsection{Summary and Motivation}
+
+Prior work demonstrates the value of multimodal physiological signals and temporal modeling for cognitive and mental-health assessment. However, existing sleep analysis approaches often treat sleep stages as independent observations and provide limited insight into transition dynamics and subject-level temporal structure. These limitations motivate the development of unified frameworks that explicitly model sleep as a sequential, multimodal, and subject-specific physiological process.
+
+\printbibliography[heading=subbibintoc]
+
+\end{document}

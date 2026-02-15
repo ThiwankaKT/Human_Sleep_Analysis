@@ -1,0 +1,6 @@
+PWD c:/Projects/3920_Project/LaTeX
+INPUT c:/Users/cynth/AppData/Roaming/TinyTeX/texmf.cnf
+INPUT c:/Users/cynth/AppData/Roaming/TinyTeX/texmf-dist/web2c/texmf.cnf
+INPUT c:/Users/cynth/AppData/Roaming/TinyTeX/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT c:/Projects/3920_Project/LaTeX/CanAI2026_paper.tex
+OUTPUT CanAI2026_paper.log
