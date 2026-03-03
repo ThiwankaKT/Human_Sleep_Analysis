@@ -1,0 +1,430 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Canadian AI Latex Template    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{cai26}
+
+\begin{document}
+% Editorial staff will replace the following values:
+% 1. Conference Year
+% 2. Issue number
+% 3. Article DOI
+\def\conferenceyear{2026}
+\volumeheader{39}{0}%{00.000}
+\begin{center}
+
+\title{Temporal Characterization and Deep Learning-Based Modeling of Human Sleep from Multivariate Polysomnography-Derived Features}
+\maketitle
+
+\thispagestyle{empty}
+\pagenumbering{gobble}
+
+% Add Authors and Affiliations in the camera ready
+% for the double blind review, please leave this section as is 
+\begin{tabular}{cc}
+First Author\upstairs{\affilone,*}, Second Author\upstairs{\affilone}, Third Author\upstairs{\affilthree}
+\\[0.25ex]
+{\small \upstairs{\affilone} Affiliation One} \\
+{\small \upstairs{\affiltwo} Affiliation Two} \\
+{\small \upstairs{\affilthree} Affiliation Three} \\
+\end{tabular}
+  
+% Replace with corresponding author email address
+\emails{
+  \upstairs{*} corresponding\_author@example.ca 
+}
+\vspace*{0.1in}
+\end{center}
+
+\begin{abstract}
+More recently, artificial intelligence is applied in studying physiological signals to evaluate health, yet the modeling of temporal dependencies is still a focus of 
+research. In sleep studies, for example, 30 second epochs are frequently treated as independent samples, preventing the study of sleep stage transitions, signal 
+interactions, and broader patterns in an individual's sleep architecture. To address these limitations, the present work presents a modular temporal analysis for 
+modeling sleep physiology in a model based on features derived from polysomnography (PSG). The method combines subject-wise sleep pattern profiling with multivariate 
+temporal dependency modeling and sequence-based sleep stage prediction to get both short and long range temporal dynamics in EEG, EOG, and EMG signals. Linear vector 
+autoregression is used to quantify cross signal relationships and temporal persistence, while a Bi-LSTM sequence model capitalizes on contextual information for sleep 
+stage classification. Experiments using the Sleep-EDF dataset show substantial differences across individuals in sleep fragmentation, strong within-signal temporal 
+continuity, and selective cross-modal coupling. Adding temporal structure improves classification accuracy from 74.92\% to 83.94\% and macro F1-score boosts up from 
+0.57 to 0.65 due to better detection of minority and transitional stages. For all these reasons, the results highlight an increase in interpretability along with 
+improved predictive performance of temporal modeling, further supporting its use for enhanced sleep-stage characterization and structured physiological analysis.
+\end{abstract}
+
+% add your keywords
+\begin{keywords}{Keywords:}
+Sleep analysis, Polysomnography, Temporal modeling, Sleep-stage transitions, Vector autoregression, Recurrent neural networks, EEG, EOG, EMG
+\end{keywords}
+\copyrightnotice
+
+%{\noindent{\bf Editors:} Lydia Bouzar-Benlabiod, Carson K. Leung}
+
+\section{Introduction}
+\label{introduction}
+Sleep is a structured neurophysiological activity which is heavily determined by the interplay of changes in the neural, ocular, and muscular systems. Polysomnography 
+(PSG) is a type of monitoring that provides synchronized measurements from electroencephalography (EEG), electrooculography (EOG), and electromyography (EMG), thus 
+enabling detailed tracking of the sleep dynamics over the duration of 30 second epochs~\cite{Kemp2000SleepEDF}. Cumulatively these signals provide representation of the progression of sleep 
+stages, transitions, and global sleep organization throughout the night.
+
+Recent developments in deep learning systems can learn representations directly from physiological signals, greatly enhancing automatic sleep-stage classification~\cite{Supratak2017,Chambon2018}. Many 
+existing approaches focus on per-epoch accuracy but consider stage labels as independent objectives~\cite{Supratak2017}. These formulations frequently ignore the structural temporal 
+dependencies that characterize the evolution of sleep such as probability-based stage transitions, continuity conditions, and cyclic architecture structures~\cite{Phan2019}. Modeling 
+sleep as a temporally coherent multivariate process continues to be challenging.
+
+Apart from the accuracy of classification, insights into sleep-stage transition behavior and global sleep architecture are also important for accounting for 
+inter-subject variability and recognizing stable sleep phenotypes~\cite{Phan2019J,Phan2022}. Physiological signals captured during sleep exhibit a dynamic temporal structure that is amenable not 
+only to predictive modeling but also statistical interpretation of dynamic patterns dependent on modalities. Combining sequential deep learning with interpretable 
+temporal analysis paves the way for a comprehensive modeling of sleep organization.
+
+This study proposes a temporally relevant modeling scheme to mitigate these limitations of PSG-based physiological signatures. Rather than treating sleep stages as 
+independent classification targets, the proposed approach views sleep as a structured evolving multivariate sequence influenced by cross-modal physiological interactions 
+and transition dynamics~\cite{Chambon2018,Phan2022}. It combines sequence-based predictive modeling with statistical temporal analysis in order to characterize dependencies among EEG, EOG, and EMG 
+data, and stage transition behavior, as well as to analyze global sleep architecture patterns across the subjects.
+
+This work is useful in three ways. First, we describe subject-level sleep architecture through performance assessments across different individuals, summarizing and 
+comparing structure, continuity, and fragmentation of stages in human sleep. Second, we build a sequence-based model of sleep-stage prediction from an epoch-wise 
+perspective that allows taking into account temporal dependencies in multivariate physiological signals~\cite{Supratak2017,Phan2019,Pham2023}. Third, we investigate time dependence between data signals and 
+potential stage transitions to help interpret the temporal evolution of sleep.
+
+By incorporating linear statistical modeling and nonlinear sequence-based learning, this work progresses the analysis of sleep physiology based on the epoch-level 
+classification beyond independent epoch-level classification. This approach focuses on reproducibility and scalability, allowing for systematic evaluation of temporal 
+structure in PSG-generated signals.
+
+The proposed methodology operates at three complementary temporal resolutions. We use subject-wise aggregation to characterize inter-individual variability in sleep 
+organization at the population level. At the within-subject level, temporal dependency modeling models short-term physiological interactions in sleep. At the epoch level, 
+sequence-based predictive modeling considers how contextual information affects sleep-stage classification. This multi-scale design allows for concurrent examination of 
+sleep dynamics at population, individual, and epoch-level levels.
+
+\section{Literature Review}
+\label{literature}
+Automated sleep-stage classification has also evolved, driven by deep learning architectures that learn hierarchical and temporal 
+representations directly from polysomnography (PSG) signals. Initial computational techniques typically based on time-domain and 
+spectral features generated manually from EEG, EOG, and EMG signals, along with classical classifiers, including support vector 
+machines and ensemble models. Although capable of implementing these methods, 30 second epochs were considered as independent 
+observations and did not reflect the structured temporal evolution in sleep architecture. 
+
+With the advent of deep neural networks, this paradigm changed into a sequence-aware modeling. DeepSleepNet~\cite{Supratak2017} showed that 
+integration of convolutional neural networks (CNNs) and bidirectional long short-term memory (Bi-LSTM) networks facilitated the 
+automatic extraction of features and the modeling of contextual temporal relationships. While the local characteristics of signal 
+are encoded by the convolutional element, the complex inter-epoch dependencies via the recurrent element minimize the possibility 
+of introducing unrealistic stage transitions, and therefore enhancing the stability of the system. Expanding on this concept a 
+hierarchical sequence-to-sequence architecture of a multi-dimensional architecture was introduced in SeqSleepNet~\cite{Phan2019}, for 
+jointly modeling intra-epoch representations and inter-epoch transitions. As an interpretation, the model further enhanced sleep 
+staging as a sequential prediction problem, because they predicted non-isolated stage sequences instead of separate labels from 
+each other. 
+
+Later studies explored hybrid temporal architectures. In this manner, CNN-Transformer-LSTM models~\cite{Pham2023} combined attention 
+mechanisms to capture long-range dependencies and convolutional as well as recurrent processing. Joint 
+classification-and-prediction schemes~\cite{Phan2019J} added adjacent prediction epochs in order to achieve local transition smoothness 
+without large input sequences. Combined ensemble methods that employ many end-to-end sequence models achieved enhanced robustness 
+and associated transition sensitivity~\cite{Wang2020}. DSSNet~\cite{Chang2022} focus was on deep sequential representation learning, so as to 
+highlight the need to consider temporal structure beyond straightforward epoch classification. 
+
+Integrated multimodal and multi-view modeling approaches that exploit complementary physiological signals have been reinforced. 
+Prior studies have proposed context-based multimodal CNN-BiLSTM architectures~\cite{Chambon2018} and multi-channel CNN-BiLSTM hybrid 
+networks~\cite{Karim2025} and their combined model for EEG, EOG, and EMG signals improved discrimination of REM, non-REM, and wake state, 
+especially in transitional borderline states. XSleepNet~\cite{Phan2022} proposed a multi-view sequential framework that unites raw 
+waveform signals with time-frequency representations, performing adaptive gradient blending to adjust heterogeneous feature 
+spaces. In CareSleepNet~\cite{Wang2024}, convolutional and attention-based approach were further integrated to accelerate cross-modal 
+fusion and temporal sensitivity.
+
+Taken together, these developments provide three notable trends in contemporary automated analysis of sleep: (i) end-to-end 
+representation learning, (ii) modeling explicitly time sequence, and (iii) multimodal physiology integration. These architectures 
+show the impact of adding temporal context on predictive performance and transition continuity. 
+
+Despite significant advancements in sequence modeling and multimodal fusion have been made, many current techniques focus on 
+providing classification accuracy metrics only, failing to embed temporal dependencies implicitly in deep networks. Explicit 
+statistical measurements of cross modal physiological interplay and lag based temporal persistence are still relatively scarce. 
+Moreover, feature-based characterization of sleep architecture subject-level features including fragmentation patterns, continuity 
+measures, and inter individual variability are rarely considered when implementing predictive prediction processes. Deep sequence 
+models capture contextual information, but do not generally provide interpretable estimates of cross-signal interactions, and 
+structured temporal persistence.
+
+Consequently, previous studies have largely contributed to advancing sequential modeling~\cite{Supratak2017,Phan2019}, 
+hybrid models~\cite{Pham2023,Phan2019J,Wang2020,Chang2022} and multimodal integration~\cite{Chambon2018,Karim2025,Phan2022,Wang2024}, 
+an integrated model which connects interpretable 
+multivariate temporal modeling to deep sequence learning and subject-level sleep architecture characterization, a unified 
+pipeline linking interpretable multivariate temporal modelling and deep sequence learning and subject-level sleep architecture 
+characterization is still largely underinvestigated. Closing this gap allows for the modeling of sleep as not only a discrete 
+classification task, but also an organized, multi-scaled and coordinated physiological process governed by neural, ocular, and 
+muscular dynamics.
+
+\section{Methodology}
+\label{method}
+The analysis is structured around three complementary components: (i) subject-wise sleep pattern analysis, (ii) within-subject temporal dependency and transition 
+modeling, and (iii) epoch-level predictive sequence modeling.
+
+\subsection{Dataset and Data Representation}
+
+Analyses were performed using the Sleep-EDF Expanded database~\cite{Kemp2000SleepEDF,Goldberger2000PhysioNet}, a publicly available benchmark dataset widely used in automatic sleep staging research. The 
+dataset contains full-night PSG recordings collected from adult subjects under laboratory conditions and annotated according to standard clinical sleep-scoring 
+guidelines~\cite{AASM2014}.
+
+Each recording consists of synchronized EEG, EOG, and EMG signals segmented into non-overlapping 30-second epochs. EEG signals are obtained from Fpz-Cz and Pz-O
+z derivations, EOG from the horizontal channel, and EMG from the submental channel. For each epoch and channel, statistical features (mean, standard deviation, RMS) are 
+extracted, yielding multivariate time series indexed by epoch. Sleep stages are annotated at the epoch level with five classes: Wake (W), N1, N2, N3, and REM.
+
+All physiological features are standardized per subject to reduce inter-individual variability. EMG features are further normalized using a rolling-window z-score to 
+address amplitude variability and transient muscle activity. Temporal ordering is preserved throughout all analyses.
+
+\subsection{Subject-Wise Sleep Pattern Analysis}
+
+Aggregated temporal representations summarise and compare sleep architecture across individuals. Epoch level sleep stage sequences 
+are summarized on the recording and subject levels to capture inter subject variability in sleep organization. For every night 
+recording of the subject, sleep fragmentation is measured across two metrics~\cite{Bonnet2003Fragmentation}; sleep stage transitions (the change from consecutive 
+epoch labels), and awakenings (the sleep stage transition from any sleep stage N1, N2, N3, or REM to Wake). These metrics are 
+calculated directly from the ordered sleep stage sequence and averaged to derive subject level means over nights.
+
+Global sleep organization is further described by mean metrics using summary measures, which derive from epoch-level labels. Sleep 
+efficiency (SE\%) is computed as the proportion of epochs classified as sleep relative to the total number of epochs in a 
+recording~\cite{Bonnet2003Fragmentation}. Deep sleep proportion (N3\%) is computed as the percentage of N3 epochs relative to the total number of sleep epochs. 
+Collectively, these normalized metrics serve to make the sleep architecture at the subject level more clearly apparent for 
+subsequent comparisons between subjects. The subject-level fragmentation measurements are also used to identify representative 
+recordings for fine temporal modeling, where individuals with the highest fragmentation are given specific attention.
+
+\subsection{Temporal Dependency and Transition Analysis}
+
+To examine short-term physiological interactions and stage transition dynamics~\cite{Taguchi2000Markov}, Vector Autoregression (VAR)~\cite{Lutkepohl2005VAR} is employed to jointly model EEG, EOG, and EMG dynamics.
+
+\begin{equation}
+\mathbf{y}_t =
+\begin{bmatrix}
+EEG_t \\
+EOG_t \\
+EMG_t
+\end{bmatrix}
+\end{equation}
+
+A VAR($p$) model is defined as:
+
+\begin{equation}
+\mathbf{y}_t = \mathbf{c} + \sum_{k=1}^{p} \mathbf{A}_k \mathbf{y}_{t-k} + \boldsymbol{\varepsilon}_t
+\end{equation}
+
+Stationarity assumptions are evaluated using the Augmented Dickey-Fuller (ADF) test~\cite{DickeyFuller1979ADF} and the KPSS test~\cite{Kwiatkowski1992KPSS}. Model parameters are estimated via ordinary 
+least squares~\cite{Lutkepohl2005VAR}.
+
+\subsection{Predictive Sequence Modeling}
+
+Sleep staging is restructured and represented as a temporal sequence modeling problem, in which consecutive epochs are grouped 
+into windows of length $T = 20$, corresponding to a 10 minute temporal context. The model predicts the sleep stage label 
+associated with the final epoch in the sequence given an ordered sequence of physiological feature vectors 
+${\mathbf{x}_1, \mathbf{x}_2, \ldots, \mathbf{x}_T}$. This formulation enables the classifier to learn contextual 
+information from earlier epochs rather than treating each epoch independently. 
+
+All input features are standardized using statistics only calculated from the training data to avoid leakage of information and 
+to ensure uniform scaling of subjects. Temporal dependencies are modeled with a two layer bidirectional Long Short Term Memory 
+network~\cite{Hochreiter1997LSTM,Schuster1997BiLSTM}, that encompasses nonlinear relationships in both forward and backward temporal directions. Then, the resulting 
+hidden representation is passed through a fully connected classification layer, and class probabilities are obtained using a 
+Softmax activation function~\cite{Goodfellow2016DeepLearning}. 
+
+To compensate for class imbalance through sleep stages, training makes use of a class weighted cross entropy loss~\cite{Goodfellow2016DeepLearning}, in 
+which higher weight gets assigned to the underrepresented stages. This optimization is done by AdamW~\cite{Loshchilov2019AdamW} with a weight 
+decay of $1 \times 10^{-4}$, and dropout is done with a rate of 0.3 between recurrent layers to prevent overfitting, while also 
+enabling better generalization as well.
+
+\section{Results and Discussion}
+\label{results}
+
+This section presents the findings related to subject wise sleep pattern analysis, temporal dependency modeling, and sequence based sleep stage prediction.
+
+\subsection{Subject-Wise Sleep Pattern Analysis}
+
+Sleep fragmentation was evaluated across all subjects using two complementary quantitative measures. The first measure is the average number of sleep stage transitions 
+per night, computed as the number of changes between consecutive epoch level stage labels. The second measure is the average number of awakenings, defined as transitions 
+from any sleep stage including N1, N2, N3, or REM to Wake. Together, these metrics provide a structured assessment of sleep continuity and stage instability at the 
+subject level.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fragmentation_top15.png}
+\caption{Top 15 subjects ranked by average number of sleep-stage transitions, illustrating inter-subject variability in sleep fragmentation.}
+\label{fig:fragmentation}
+\end{figure}
+
+Figure 1 presents the top 15 most fragmented subjects based upon the average number of stage transitions. A lot of inter-subject 
+variability occurs, and fragmentation scales from around 200 to over 350 transitions per night. The highest level of fragmentation 
+was recorded in Subject 4652, implying a very unstable sleep architecture. 
+
+In a concurrent study, the association was analyzed of fragmentation and sleep efficiency. Across respondents, there was a 
+moderate level of a positive relationship between number of awakenings and sleep efficiency 
+(Pearson $r = 0.301$, Spearman $\rho = 0.297$). Though increased fragmentation is typically linked to decreased sleep quality, 
+this finding indicates considerable heterogeneity in terms of the compensating mechanisms that individuals use to make up for 
+frequent awakenings and reiterates the importance of subject-level analysis rather than population averages. 
+
+The second night recording of the Subject 465 represents an extreme fragmentation phenotype which was selected for detailed '
+temporal modeling in later analyses based on these findings.
+
+\subsection{Temporal Dependency and Transition Analysis (VAR)}
+
+A Vector Autoregression (VAR) model was fitted to EEG Fpz-Cz RMS, EEG Pz-Oz RMS, EOG horizontal RMS, and EMG submental RMS signals 
+for subject 465, night 2. Four lags corresponding to 30 seconds, 1 minute, 2 minutes, and 4 minutes were included to capture 
+short-term physiological interactions. 
+
+Strong within-signal temporal persistence was demonstrated, especially in regard to EMG recordings. Past EMG values strongly 
+predicted current EMG values (lag 1 coefficient = 0.715, $p < 0.001$), suggesting high short-term muscle tone continuity during 
+sleep. EEG signals also showed strong autoregressive structure, reflecting rhythmic neural activity in sleep stages. 
+
+Specific cross-modal interactions were evident between groups. Frontal EEG activity somewhat predicted later EOG horizontal 
+activity (lag 1 coefficient = 0.042, $p = 0.028$). This indicates short-term coupling between neural and ocular activity. In 
+contrast, cross-modal influences involving EMG were weaker, indicating the muscles were quite autonomous during periods of 
+sleep. 
+
+Residual correlations were moderate between EEG and EOG ($r \approx 0.45$) and low between EMG and other modalities 
+($r < 0.16$), suggesting that the VAR model captured a great deal of shared temporal structure. 
+
+Table 1 summarizes forecast accuracy for each physiological signal. EEG signals have the lowest prediction error overall, and 
+posterior EEG (Pz-Oz) shows the highest level of short-term predictability. Similar results for EMG submental activity also 
+indicate low forecast error indicative of high temporal persistence of muscle tone during sleep.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Signal} & \textbf{MAE} & \textbf{RMSE} \\
+\midrule
+EEG Fpz--Cz (RMS) & 1.362 & 1.678 \\
+EEG Pz--Oz (RMS) & 0.536 & 0.640 \\
+EOG Horizontal (RMS) & 1.528 & 1.729 \\
+EMG Submental (RMS, normalized) & 0.472 & 0.619 \\
+\bottomrule
+\end{tabular}
+\caption{Forecast accuracy of VAR model for subject 465, night 2. MAE: Mean Absolute Error; RMSE: Root Mean Squared Error.}
+\label{tab:var_accuracy}
+\end{table}
+
+Horizontal EOG, in comparison, has much larger errors, which is indicative of its rapid fluctuation and sensitivity to 
+sleep-stage transitions. These differences suggest that short-term predictability differs greatly by modality, with EEG and 
+EMG following more stable timelines than ocular activity.
+
+Figure 2 compares observed and VAR-forecasted physiological signals for subject 465, night 2. EEG and EMG dynamics are well 
+observed by the model but larger deviation from the predicted behavior is seen for horizontal EOG activity, consistent with its 
+irregular changes. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/forecasting.png}
+  \caption{Observed and VAR-forecasted EEG, EOG, and EMG RMS signals for subject 465, night 2.}
+  \label{fig:var_forecast}
+\end{figure}
+
+Overall, the results confirm that physiological sleep dynamics are signal-specific and are structured 
+rather than stochastic, and indicate the advantages of multivariate temporal models for sleep analysis.
+
+\subsection{Predictive Sequence Modeling (Bi-LSTM)}
+
+The training and validation behavior of the proposed Bi-LSTM model is shown in Fig. 3. Training loss decreases steadily along 
+consecutive epochs, while validation accuracy stabilizes, suggesting convergence and generalization to unseen subjects 
+(with class-weighted tuning). 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/training_validation.png}
+  \caption{Bi-LSTM temporal learning process.}
+  \label{fig:bilstm_train}
+\end{figure}
+
+While validation accuracy is stable, the validation loss is often greater than the training loss. This highlights the striking 
+class imbalance in sleep-stage distributions where Wake (W) is predominant while transitional stages like N1 and REM occur less 
+frequently than the normal stages. Class-weighted optimization raises the penalty for misclassifications of minority stages; as 
+such, a relatively small number of errors in these stages can yield a relatively large validation loss even if overall accuracy 
+remains stable. 
+
+Furthermore, validation recordings refer to previously unseen subjects, creating physiological variability in the EEG, EOG, and 
+EMG signal characteristics. The inter-subject variability further adds uncertainty around sleep-stage transitions, where 
+classification mistakes are both more frequent and more severely penalized. Consequently, elevated validation loss indicates 
+stronger sensitivity toward minority and transitional stages rather than reduced model generalization. 
+
+In Table 2, the quantitative performance on the validation set is compared between the sequence-based Bi-LSTM model and the 
+epoch-level XGBoost baseline.
+
+\begin{table}[H]
+\centering
+\caption{Performance comparison of sleep-stage classification models.}
+\label{tab:model_perf}
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Prediction} & \textbf{Recall} & \textbf{F1 Score} \\
+\hline
+XGBoost (epoch-level) & 74.92\% & 0.5590 & 0.6225 & 0.5745 \\
+Bi-LSTM (sequence-level) & \textbf{83.94\%} & \textbf{0.6721} & \textbf{0.6325} & \textbf{0.6474} \\
+\hline
+\end{tabular}
+\end{table}
+
+The Bi-LSTM shows an absolute accuracy gain of 9.02 percentage points over the non-temporal baseline. Macro-averaged precision 
+and F1 score improvements suggest increased detection of minority and transitional sleep stages, validating the utility of 
+incorporating temporal context into sleep-stage prediction. 
+
+After training, the Bi-LSTM also performs complete automatic sleep-stage labeling at a standard 30 second epoch resolution. During 
+inference, sequences of physiological characteristics collected from EEG, EOG, and EMG signals are processed to predict the sleep 
+stage of the most recent epoch. The model generates a result by sliding the temporal window over an entire recording, producing a 
+fully automatically labeled hypnogram which has direct comparisons to expert-scored annotations. 
+
+In addition to discrete sleep-stage predictions made, the model also provides a confidence score for each epoch, defined as the 
+maximum predicted class probability. In stable sleep conditions, higher confidence values are usually seen, while lower confidence 
+values occur most often near sleep-stage transitions and physiologically ambiguous stages such as N1 and REM. This measure of 
+confidence gives a readable indication of the reliability of prediction and emphasizes epochs with increased temporal uncertainty.
+
+\subsection{Discussion}
+
+These findings confirm that sleep physiology is regulated by organized temporal dependencies that are multi-level effects such as 
+subject-wise structure, inter-signal dynamics, and sequence-level prediction~\cite{Phan2019,Phan2022,Li2024SleepFC}.
+
+The data shows significant heterogeneity in sleep fragmentation that confirms population-averaged metrics are not ideal for study. 
+Highly fragmented individuals allow for targeted temporal analysis and assist in personalized sleep characterization.
+
+VAR analysis verifies that EEG, EOG, and EMG signals display strong within-signal persistence and selective cross-modal coupling, 
+as demonstrated by VAR modeling. Neural-ocular interactions can take place over short time spans, and muscle activity is largely 
+self-driven. These results give direct empirical support that sleep-stage transitions arise from coordinated, yet asymmetric 
+physiological interactions rather than independent processes~\cite{Chen2019LFP}.
+
+Modeling by sequence also shows that embedding temporal context substantially enhances sleep-stage classification~\cite{Supratak2017,Mousavi2019SleepEEGNet}. The superiority 
+of the Bi-LSTM over epoch-based baselines indicates that sleep needs to be considered as a continuous process rather than just 
+decisions made in isolation. Increased validation loss with stable accuracy indicates sensitivity to minority stages not 
+decreased generalization.
+
+The results collectively provide a coherent picture of sleep as a multivariate, time-dependent system in which subject-wise 
+structure, short-term physiological dynamics, and long-range temporal context combine to determine the patterned sleep 
+architecture.
+
+\section{Conclusion}
+
+The work presented a unified framework to assess human sleep as a multivariate and temporally organized physiological process 
+with cues derived from polysomnography. By going beyond independent epoch-level analysis, the proposed approach identifies sleep 
+dynamics at the basis of (1) subject-wise architecture (2) inter-signal temporal dependencies (3) sequence-based sleep-stage 
+prediction. Results thus establish that sleep physiology presents an interpretable temporal structure throughout sleep, consistent 
+with the view of sleep as continuous and regulated by coordinated neural, ocular, and muscular activity. 
+
+Subject-wise analysis showed that sleep fragmentation varies greatly between individuals, which suggests that population averages 
+do not fully capture personal sleep patterns. Identifying highly fragmented subjects allowed for more focused temporal modeling and 
+helped in selecting representative cases for detailed study. These findings highlight the importance of analyzing sleep at the 
+individual level to better understand sleep dynamics.
+
+Temporal dependency analysis by vector autoregression corroborated considerable within signal persistence as well as selective 
+cross-modal encounters of EEG, EOG, and EMG signals. Thus, the mismatch in cross-signal coupling we observed indicates that 
+sleep-stage transitions result from coordinated but uneven physiological interactions, rather than independent or purely top-down 
+processes. Forecasting also proved that short-term physiological dynamics are well established signal-specific and predictable, 
+which further supports the applicability of time profiling for sleep analysis. 
+
+Bi-LSTM-based sequential modeling significantly enhanced sleep-stage classification versus epoch-level baselines. By factoring in 
+temporal context the model attained superior accuracy and recognition of minority and transient sleep phases. Predictions were 
+even more confidence-aware to enable interpretable markers of time uncertainty, especially in the vicinity of sleep-stage borders. 
+
+Collectively, these results show that using temporal sequence modeling leads to higher and more stable sleep-stage prediction compared to 
+epoch-level methods. This study combines subject wise analysis, interpretable temporal modeling, and sequence-based prediction in a 
+single approach. The findings highlight the importance of reproducibility and clear physiological interpretation in multivariate sleep 
+analysis. Future work may include adding more physiological signals, studying longer time periods, and developing scalable methods for 
+personalized sleep monitoring in real-world settings.
+
+\section*{Acknowledgements}
+This section can be left blank during double-blind review. 
+
+%Appendixes go here
+\appendix
+
+% All references should be stored in the file "references.bib".
+% That call to use that file is in "cai.cls". 
+% Please do not modify anything below this line.
+\printbibliography[heading=subbibintoc]
+
+\end{document}
