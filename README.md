@@ -15,12 +15,15 @@ The study uses the Sleep-EDF Expanded Dataset containing overnight sleep recordi
 ## Methodology
 
 **1. Population Segmentation & Clustering**
+
 Identified distinct sleep behavior profiles across individuals using subject-level characteristics.
 
 **2. Temporal Dependency Modeling**
+
 Applied Vector AutoRegression (VAR) to examine temporal relationships between EEG, EOG, and EMG signals.
 
 **3. Sequence-Based Sleep Staging**
+
 Developed a Bidirectional LSTM (BiLSTM) model to predict sleep stages using temporal context and compared its performance with an XGBoost baseline.
 
 ## Results
@@ -30,10 +33,13 @@ Developed a Bidirectional LSTM (BiLSTM) model to predict sleep stages using temp
 - Improved sleep-stage classification performance using temporal sequence modeling.
 
 | Model | Accuracy | F1 Score |
-|---------|----------|----------|
+|:-------|:--------:|:--------:|
 | XGBoost | 74% | 0.57 |
-| BiLSTM | 84% | 0.65 |
+| BiLSTM | **84%** | **0.65** |
 
+✅ **10% increase in classification accuracy**
+
+✅ Improved detection of transitional and minority sleep stages through temporal sequence modeling.
 
 ## Applications
 
